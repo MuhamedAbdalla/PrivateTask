@@ -42,6 +42,7 @@ pipeline {
           try {
             docker.withRegistry('', registryCredential) {
               dockerImage.push()
+              dockerImage.push("latest")
             }
           } catch(Exception e) {
             unstable("Warning: ${e.message}")
@@ -54,6 +55,18 @@ pipeline {
         script {
           try {
             sh "docker rmi $registry:" + applicationReleaseVersion
+          } catch(Exception e) {
+            unstable("Warning: ${e.message}")
+          }
+        }
+      }
+    }
+    stage("Deploying To Kubernetes") {
+      steps {
+        script {
+          try {
+            kubernetesDeploy(configs: "load-balance.yml", kubeconfigId: kubeconfigId)
+            kubernetesDeploy(configs: "service-deployment.yml", kubeconfigId: kubeconfigId)
           } catch(Exception e) {
             unstable("Warning: ${e.message}")
           }
