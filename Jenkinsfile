@@ -6,7 +6,7 @@ pipeline {
     dockerImage = ''
     failureReportSubject = "${env.JOB_NAME} - Build # ${env.BUILD_NUMBER} - FAILURE!"
     adminEmails = "medokingdom7@gmail.com"
-    applicationReleaseVersion = "latest-${env.BUILD_NUMBER}.0.0"
+    applicationReleaseVersion = "latest-1.0.0"
   }
   agent any
   stages {
@@ -42,7 +42,6 @@ pipeline {
           try {
             docker.withRegistry('', registryCredential) {
               dockerImage.push()
-              dockerImage.push("latest")
             }
           } catch(Exception e) {
             unstable("Warning: ${e.message}")
