@@ -20,5 +20,5 @@ COPY --from=builder /go/src/github.com/instabug/goviolin/app .
 # Port indentification
 EXPOSE 8080
 
-# Run binary file
+# Run binary file CMD
 CMD ["./main"]

@@ -44,7 +44,7 @@ pipeline {
         }
       }
     }
-    stage('Remove Unused docker image') {
+    stage('Remove docker image after push to dockerhub') {
       steps {
         script {
           try {
