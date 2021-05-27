@@ -5,7 +5,7 @@ pipeline {
     dockerImage = ''
     failureReportSubject = "${env.JOB_NAME} - Build # ${env.BUILD_NUMBER} - FAILURE!"
     adminEmails = "medokingdom7@gmail.com"
-    applicationReleaseVersion = "latest-1.0.0"
+    applicationReleaseVersion = "latest-1.2.0"
     loadBalanceYML = "load-balance.yml"
     serviceDeploymentYML = "service-deployment.yml"
     kubeConfigKey = "kubeConfigKey"
