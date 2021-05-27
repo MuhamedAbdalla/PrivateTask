@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
       - name: go-violin-service-container
-        image: 01141354474/online-challenge:latest-1.0.0
+        image: 01141354474/online-challenge:latest-1.2.0
         imagePullPolicy: Always
         ports:
         - containerPort: 3000
