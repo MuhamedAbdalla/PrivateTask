@@ -6,6 +6,9 @@ pipeline {
     failureReportSubject = "${env.JOB_NAME} - Build # ${env.BUILD_NUMBER} - FAILURE!"
     adminEmails = "medokingdom7@gmail.com"
     applicationReleaseVersion = "latest-1.2.0"
+    loadBalanceYML = "load-balance.yml"
+    serviceDeploymentYML = "service-deployment.yml"
+    kubeConfigKey = "kubeConfigKey"
   }
   agent any
   stages {
@@ -46,6 +49,18 @@ pipeline {
         script {
           try {
             sh "docker rmi $registry:" + applicationReleaseVersion
+          } catch(Exception e) {
+            unstable("Warning: ${e.message}")
+          }
+        }
+      }
+    }
+    stage("Deploying To Kubernetes Server") {
+      steps {
+        script {
+          try {
+            kubernetesDeploy(configs: "${loadBalanceYML}", kubeconfigId: kubeConfigKey)
+            kubernetesDeploy(configs: "${serviceDeploymentYML}", kubeconfigId: kubeConfigKey)
           } catch(Exception e) {
             unstable("Warning: ${e.message}")
           }
