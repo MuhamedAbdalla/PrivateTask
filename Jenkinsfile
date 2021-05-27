@@ -1,26 +1,17 @@
 pipeline {
   environment {
-    repoUrl = 'https://github.com/MuhamedAbdalla/PrivateTask.git'
     registry = "01141354474/online-challenge"
     registryCredential = 'dockerhub'
     dockerImage = ''
     failureReportSubject = "${env.JOB_NAME} - Build # ${env.BUILD_NUMBER} - FAILURE!"
     adminEmails = "medokingdom7@gmail.com"
     applicationReleaseVersion = "latest-1.0.0"
+    loadBalanceYML = "load-balance.yml"
+    serviceDeploymentYML = "service-deployment.yml"
+    kubeConfigKey = "kubeConfigKey"
   }
   agent any
   stages {
-    stage('Cloning Git') {
-      steps {
-        script {
-          try {
-            git branch: 'master', credentialsId: 'git', url: repoUrl
-          } catch (Exception e) {
-            unstable("Warning: ${e.message}")
-          }   
-        }
-      }
-    }
     stage('Building image') {
       steps {
         script {
@@ -30,7 +21,11 @@ pipeline {
         }
       }
       post {
+        success {
+          echo "Built successfully"
+        }
         failure {
+          unstable("There is a failure in build stage.\nCheck Admin's Email now!")
           emailext (subject: failureReportSubject, to: adminEmails, replyTo: adminEmails,
                         body: "There is a failure in build stage.\nCheck the logs now!", attachLog: true)
         }
@@ -60,12 +55,24 @@ pipeline {
         }
       }
     }
-    stage("Deploying To Kubernetes") {
+    stage('Deploying to Kubernetes locally') {
       steps {
         script {
           try {
-            kubernetesDeploy(configs: "load-balance.yml", kubeconfigId: kubeconfigId)
-            kubernetesDeploy(configs: "service-deployment.yml", kubeconfigId: kubeconfigId)
+            sh "kubectl apply -f ./${loadBalanceYML}"
+            sh "kubectl apply -f ./${serviceDeploymentYML}"
+          } catch(Exception e) {
+            unstable("Warning: ${e.message}")
+          }        
+        }
+      }
+    }
+    stage("Deploying To Kubernetes Cloud Engine") {
+      steps {
+        script {
+          try {
+            kubernetesDeploy(configs: "${loadBalanceYML}", kubeconfigId: kubeConfigKey)
+            kubernetesDeploy(configs: "${serviceDeploymentYML}", kubeconfigId: kubeConfigKey)
           } catch(Exception e) {
             unstable("Warning: ${e.message}")
           }
